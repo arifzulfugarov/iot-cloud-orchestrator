@@ -14,27 +14,41 @@
   <h1>CNF / IoT Device Status</h1>
   <div id="device-list">Loading...</div>
 
-  <script>
-    async function fetchDevices() {
-      try {
-        const res = await fetch("https://localhost:8443/device/status");
-        const devices = await res.json();
-        const list = document.getElementById("device-list");
-        list.innerHTML = "";
-
-        devices.forEach(d => {
-          const box = document.createElement("div");
-          box.className = "device" + (d.recovered ? " offline" : "");
-          box.innerHTML = `<strong>${d.id}</strong><br>Status: ${d.status}<br>Last seen: ${new Date(d.last_seen).toLocaleString()}`;
-          list.appendChild(box);
-        });
-      } catch (err) {
-        document.getElementById("device-list").innerText = "Unable to fetch device data.";
+ <script>
+  async function fetchDevices() {
+    const devices = [
+      {
+        id: "sensor01",
+        status: "online",
+        last_seen: new Date().toISOString(),
+        recovered: false
+      },
+      {
+        id: "sensor02",
+        status: "offline",
+        last_seen: new Date(Date.now() - 120000).toISOString(),
+        recovered: true
       }
-    }
+    ];
 
-    fetchDevices();
-    setInterval(fetchDevices, 5000);
-  </script>
+    const list = document.getElementById("device-list");
+    list.innerHTML = "";
+
+    devices.forEach(d => {
+      const box = document.createElement("div");
+      box.className = "device" + (d.recovered ? " offline" : "");
+      box.innerHTML = `
+        <strong>${d.id}</strong><br>
+        Status: ${d.status}<br>
+        Last seen: ${new Date(d.last_seen).toLocaleString()}
+      `;
+      list.appendChild(box);
+    });
+  }
+
+  fetchDevices();
+  setInterval(fetchDevices, 5000);
+</script>
+
 </body>
 </html>
