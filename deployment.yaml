@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iot-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: iot
+  template:
+    metadata:
+      labels:
+        app: iot
+    spec:
+      containers:
+      - name: iot-server
+        image: goproj:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: certs
+          mountPath: /certs
+          readOnly: true
+        command: ["./main"]
+        args: []
+        env:
+        - name: AUTH_TOKEN
+          value: "supersecrettoken"
+      volumes:
+      - name: certs
+        secret:
+          secretName: tls-secret
+---        
+apiVersion: v1
+kind: Service
+metadata:
+  name: iot-service
+spec:
+  selector:
+    app: iot
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 8443
+  type: NodePort
